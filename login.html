@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bel'Anger — Connexion</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+
+  <main class="login-container">
+    <div class="login-box">
+      <h1>Connexion</h1>
+      <form class="login-form">
+        <label for="employee">Employé</label>
+        <select id="employee" name="employee" required>
+          <option value="">-- Sélectionnez un employé --</option>
+          <option value="julien">Julien</option>
+          <option value="ludovic">Ludovic</option>
+          <option value="justine">Justine</option>
+          <option value="yannick">Yannick</option>
+        </select>
+
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" required placeholder="Votre mot de passe" />
+
+        <button type="submit" class="btn primary">Se connecter</button>
+      </form>
+    </div>
+  </main>
+
+
+  <footer>
+    <p>© 2025 Bel'Anger — Application interne</p>
+  </footer>
+
+  <script src="script.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js"></script>
+
+  <!-- Nos scripts -->
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>

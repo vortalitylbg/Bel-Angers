@@ -1,0 +1,316 @@
+/* ==========================
+   NAVBAR (Glass) - Dashboard
+   Copiez / remplacez la section navbar existante
+   ========================== */
+
+/* hauteur de la navbar (réutilisable) */
+:root {
+  --navbar-height: 72px;
+}
+
+/* garde le contenu sous la navbar fixe */
+body {
+  padding-top: calc(var(--navbar-height) + 16px);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* ==== Base glass shared (réutilisable) ==== */
+.glass {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+}
+
+/* ==== Navbar container ==== */
+.navbar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 16px;
+  z-index: 1200;
+  width: min(1200px, 94%);
+  height: var(--navbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 16px;
+}
+
+/* logo */
+.navbar .logo {
+  height: 48px;
+  display: block;
+  user-select: none;
+}
+
+/* center links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* nav items: buttons to match your previous style */
+.nav-links li { margin: 0; }
+.nav-links .nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.06);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+  gap: 8px;
+  line-height: 1;
+}
+
+/* hover / focus */
+.nav-links .nav-btn:hover,
+.nav-links .nav-btn:focus {
+  background: rgba(255,255,255,0.16);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+  outline: none;
+}
+
+/* active state (indicator) */
+.nav-links .nav-btn.active {
+  background: linear-gradient(90deg, rgba(110,231,183,0.95), rgba(124,58,237,0.9));
+  color: #041018;
+  box-shadow: 0 8px 20px rgba(124,58,237,0.12);
+}
+
+/* ==== Actions (right) ==== */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* generic glass-btn */
+.btn.glass-btn {
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .18s ease, background .18s ease;
+}
+
+/* logout / danger style — ici on met l'accent */
+.btn.glass-btn.danger {
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #7c3aed 30%));
+  color: #021019;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.35);
+  border: none;
+}
+
+.btn.glass-btn.danger:hover {
+  transform: translateY(-3px);
+  filter: brightness(0.98);
+}
+
+/* ==== Hamburger (mobile) ==== */
+.hamburger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2.6px;
+  background: #fff;
+  margin: 3px 0;
+  border-radius: 2px;
+  transition: transform .35s ease, opacity .25s ease;
+}
+
+/* transform into X when active */
+.hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+.hamburger.active span:nth-child(2) { opacity: 0; transform: translateX(-6px); }
+.hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+/* ==== Overlay (background when mobile open) ==== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .35s ease, visibility .35s ease;
+  z-index: 1100;
+}
+.overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ==== Mobile drawer menu (right) ==== */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 78vw;
+  max-width: 340px;
+  transform: translateX(100%);
+  background: rgba(10,10,14,0.94);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border-left: 1px solid rgba(255,255,255,0.04);
+  box-shadow: -10px 0 30px rgba(0,0,0,0.4);
+  transition: transform .42s cubic-bezier(.22,.61,.36,1);
+  z-index: 1150;
+  padding: 6.5rem 1.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* drawer open state */
+.mobile-menu.active {
+  transform: translateX(0);
+}
+
+/* mobile menu items */
+.mobile-menu ul { list-style: none; padding: 0; margin: 0; }
+.mobile-menu li {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  opacity: 0;
+  transform: translateX(18px);
+}
+
+/* progressive staggered animation when open */
+.mobile-menu.active li {
+  animation: mm-fade-slide .45s ease forwards;
+}
+.mobile-menu.active li:nth-child(1){ animation-delay:.06s;}
+.mobile-menu.active li:nth-child(2){ animation-delay:.12s;}
+.mobile-menu.active li:nth-child(3){ animation-delay:.18s;}
+.mobile-menu.active li:nth-child(4){ animation-delay:.24s;}
+.mobile-menu.active li:nth-child(5){ animation-delay:.30s;}
+.mobile-menu.active li:nth-child(6){ animation-delay:.36s;}
+.mobile-menu.active li:nth-child(7){ animation-delay:.42s;}
+@keyframes mm-fade-slide { to { opacity: 1; transform: translateX(0); } }
+
+.mobile-menu a,
+.mobile-menu button {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 6px 0;
+}
+
+/* mobile button in drawer */
+.mobile-menu .btn { width: 90%; margin: 1rem auto 0; }
+
+/* ==== Responsive rules ==== */
+@media (max-width: 992px) {
+  .nav-links, .nav-actions { display: none; }
+  .hamburger { display: flex; }
+  .navbar { width: calc(100% - 28px); top: 10px; padding: 0 12px; }
+}
+
+/* small screens tweak */
+@media (max-width: 480px) {
+  .navbar { height: 64px; padding: 0 10px; }
+  .navbar .logo { height: 40px; }
+  .nav-links .nav-btn { height: 40px; padding: 0 10px; font-size: 0.95rem; }
+}
+
+/* === Fix calendrier / layout === */
+
+/* espace sous la navbar fixe : adapte si tu as changé --navbar-height */
+:root { --navbar-height: 72px; }
+
+.dashboard-main {
+  position: relative;
+  z-index: 5;
+  padding: 2rem;
+  margin-top: 0; /* on gère l'espace via padding-top du body si nécessaire */
+}
+
+/* évite que la navbar fixe recouvre le contenu */
+body {
+  /* si tu as déjà un padding-top, garde-le ; sinon active ceci */
+  padding-top: calc(var(--navbar-height) + 20px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* calendar container : s'adapte à l'écran */
+#calendar {
+  margin-top: 1rem;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  color: var(--text);
+  /* important : laisser l'overflow visible pour le calendrier */
+  overflow: visible;
+  width: 100%;
+  min-height: 56vh; /* hauteur minimale pour que le mois soit visible */
+  /* max-height si tu veux limiter : max-height: calc(100vh - 200px); */
+  box-sizing: border-box;
+}
+
+/* s'assurer que le rendu interne peut s'étendre */
+#calendar .fc {
+  box-sizing: border-box;
+}
+
+/* si besoin, forcer le corps de la grille à occuper un minimum */
+.fc-daygrid-body {
+  min-height: 40vh;
+}
+
+/* responsive : sur mobile on préfère une hauteur plus grande (vue jour) */
+@media (max-width: 768px) {
+  #calendar { min-height: 66vh; padding: 8px; }
+  .fc-daygrid-day-number { font-size: 0.8rem; }
+}
+
+/* Le calendrier prend toute la largeur sur mobile */
+@media (max-width: 768px) {
+  #calendar {
+    min-height: 70vh;
+    padding: 6px;
+    font-size: 0.85rem;
+  }
+  .fc-toolbar-title {
+    font-size: 1rem;
+  }
+  .fc-button {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+  }
+}

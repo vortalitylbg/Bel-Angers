@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Bel'Anger — Tableau de bord (responsive fix)</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+  <style>
+  /* ====== Variables ====== */
+  :root{
+    --accent: #6ee7b7;
+    --text: #e6eef6;
+    --muted: #b4c0d4;
+    --navbar-height: 72px;
+  }
+
+  /* ====== Base ====== */
+  html,body{
+    margin:0;
+    height:100%;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:#05070d;
+    color:var(--text);
+    overflow-x:hidden; /* bloquer horizontal */
+    overflow-y:auto;   /* permettre scroll vertical */
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    padding-top: calc(var(--navbar-height) + 12px);
+    box-sizing: border-box;
+  }
+
+  canvas#bgCanvas{ position:fixed; inset:0; z-index:0 }
+
+  /* ====== NAVBAR ====== */
+  .glass{ background: rgba(255,255,255,0.06); backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%); border-radius:14px; border:1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 32px rgba(0,0,0,0.28); }
+
+  .navbar{
+    position:fixed;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:1200;
+    width:min(1200px,94%);
+    height:var(--navbar-height);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    padding:0 16px;
+    box-sizing:border-box;
+  }
+
+  .welcome-text{ display:inline-block; padding:10px 14px; border-radius:12px; font-weight:600; background: rgba(255,255,255,0.03); color:var(--text); max-width:60%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+
+  .nav-links{ display:flex; gap:0.6rem; list-style:none; margin:0; padding:0; align-items:center }
+  .nav-links .nav-btn{ height:44px; padding:0 12px; border-radius:10px; background:rgba(255,255,255,0.04); color:var(--text); border:1px solid rgba(255,255,255,0.06); font-weight:600; cursor:pointer }
+
+  .nav-actions{ display:flex; gap:0.6rem; align-items:center }
+  .btn.glass-btn{ padding:0.5rem 0.9rem; border-radius:10px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.12); color:var(--text); font-weight:700; cursor:pointer }
+  .btn.glass-btn.danger{ background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #7c3aed 30%)); color:#021019; border:none }
+
+  .hamburger{ display:none; width:44px; height:44px; border-radius:10px; align-items:center; justify-content:center; cursor:pointer; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); }
+  .hamburger span{ display:block; width:22px; height:2.6px; background:#fff; margin:3px 0; border-radius:2px }
+  .hamburger.active span:nth-child(1){ transform:rotate(45deg) translate(4px,4px) }
+  .hamburger.active span:nth-child(2){ opacity:0; transform:translateX(-6px) }
+  .hamburger.active span:nth-child(3){ transform:rotate(-45deg) translate(4px,-4px) }
+
+  .overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.6); opacity:0; visibility:hidden; transition:opacity .35s ease, visibility .35s ease; z-index:1100 }
+  .overlay.active{ opacity:1; visibility:visible }
+
+  .mobile-menu{ position:fixed; top:0; right:0; height:100vh; width:78vw; max-width:340px; transform:translateX(100%); background: rgba(10,10,14,0.96); backdrop-filter: blur(16px); border-left:1px solid rgba(255,255,255,0.04); box-shadow:-10px 0 30px rgba(0,0,0,0.4); transition:transform .42s cubic-bezier(.22,.61,.36,1); z-index:1150; padding:6.5rem 1.25rem 2rem; display:flex; flex-direction:column; overflow-y:auto }
+  .mobile-menu.active{ transform:translateX(0) }
+  .mobile-menu ul{ list-style:none; padding:0; margin:0 }
+  .mobile-menu li{ padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.03) }
+  .mobile-menu a, .mobile-menu button{ display:block; color:#fff; text-decoration:none; font-size:1.05rem; font-weight:600; padding:6px 0 }
+
+  /* ====== Main / Calendar ====== */
+  .dashboard-main{ position:relative; z-index:5; padding:1.25rem; max-width:1200px; margin:0 auto; box-sizing:border-box }
+  .dashboard-section{ display:none }
+  .dashboard-section.active{ display:block }
+  h2{ font-size:1.6rem; margin:0 0 12px 0 }
+
+  #calendar{ margin-top:0.8rem; background: rgba(255,255,255,0.03); border-radius:12px; padding:10px; box-shadow:0 6px 20px rgba(0,0,0,0.25); color:var(--text); width:100%; min-height:56vh; box-sizing:border-box }
+
+  /* ====== FullCalendar tweaks: make toolbar compact & non-breaking ====== */
+  .fc{ box-sizing:border-box }
+  .fc .fc-toolbar{ display:flex; flex-wrap:wrap; gap:0.4rem; align-items:center }
+  .fc .fc-toolbar .fc-left, .fc .fc-toolbar .fc-center, .fc .fc-toolbar .fc-right{ display:flex; gap:0.4rem; align-items:center }
+  .fc .fc-toolbar-title{ font-size:1rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:54vw; }
+  .fc .fc-button{ padding:6px 8px; font-size:0.82rem }
+
+  /* reduce default big calendar typography on small screens */
+  @media (max-width: 768px){
+    .dashboard-main{ padding:10px }
+    #calendar{ min-height:66vh; padding:6px }
+    .fc .fc-toolbar-title{ max-width:60vw; font-size:0.98rem }
+    .hamburger{ display:flex }
+    .nav-links, .nav-actions{ display:none }
+    .navbar{ width:calc(100% - 24px); top:8px; padding:0 10px; height:64px }
+    .welcome-text{ display:inline-block; max-width:45%; font-size:0.95rem }
+  }
+
+  @media (max-width:480px){
+    .fc .fc-toolbar-title{ max-width:46vw; font-size:0.95rem }
+    .welcome-text{ display:none } /* cacher pour gagner de la place */
+    #calendar{ min-height:72vh }
+  }
+
+  footer{ text-align:center; color:var(--muted); margin-top:18px; font-size:0.9rem }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+
+  <header>
+    <nav class="navbar glass">
+      <span id="welcomeMessage" class="welcome-text">Bienvenue</span>
+
+      <ul class="nav-links">
+        <li><button class="nav-btn" data-section="calendar">Calendrier</button></li>
+        <li><button class="nav-btn" data-section="clients">Clients</button></li>
+        <li><button class="nav-btn" data-section="stats">Statistiques</button></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn glass-btn danger" id="logoutBtn">Déconnexion</button>
+      </div>
+
+      <div class="hamburger" aria-label="Menu" role="button"><span></span><span></span><span></span></div>
+    </nav>
+
+    <div class="mobile-menu" aria-hidden="true">
+      <ul>
+        <!-- menu mobile statique (ne pas dupliquer depuis JS) -->
+        <li><button class="nav-btn" data-section="calendar">Calendrier</button></li>
+        <li><button class="nav-btn" data-section="clients">Clients</button></li>
+        <li><button class="nav-btn" data-section="stats">Statistiques</button></li>
+        <li><button class="btn glass-btn danger" id="logoutBtnMobile">Déconnexion</button></li>
+      </ul>
+    </div>
+
+    <div class="overlay"></div>
+  </header>
+
+  <main class="dashboard-main">
+    <section id="calendarSection" class="dashboard-section active">
+      <h2>Votre calendrier</h2>
+      <div id="calendar"></div>
+    </section>
+
+    <section id="clientsSection" class="dashboard-section">
+      <h2>Liste des clients</h2>
+      <p>[Gestion des clients à venir]</p>
+    </section>
+
+    <section id="statsSection" class="dashboard-section">
+      <h2>Statistiques</h2>
+      <p>[Graphiques Chart.js bientôt ici]</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Bel'Anger — Application interne</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js"></script>
+
+  <script type="module">
+  import { auth } from "./js/firebase-config.js";
+  import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+
+  // affichage utilisateur
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const name = user.email ? user.email.split('@')[0] : 'Utilisateur';
+      const el = document.getElementById('welcomeMessage');
+      if (el) el.textContent = `Bienvenue ${name}`;
+    } else {
+      window.location.href = 'login.html';
+    }
+  });
+
+  // boutons logout
+  const logoutBtn = document.getElementById('logoutBtn');
+  const logoutBtnMobile = document.getElementById('logoutBtnMobile');
+  function handleLogout(){
+    signOut(auth).then(()=>{ window.location.href = 'login.html'; }).catch(()=>{ window.location.href = 'login.html'; });
+  }
+  if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+  if (logoutBtnMobile) logoutBtnMobile.addEventListener('click', handleLogout);
+
+  // Navigation sections
+  const navButtons = document.querySelectorAll('.nav-btn');
+  const sections = document.querySelectorAll('.dashboard-section');
+  navButtons.forEach(btn => btn.addEventListener('click', () => {
+    const target = btn.getAttribute('data-section');
+    sections.forEach(s => s.classList.remove('active'));
+    const dest = document.getElementById(target + 'Section');
+    if (dest) dest.classList.add('active');
+
+    // close mobile menu if open
+    document.querySelector('.mobile-menu')?.classList.remove('active');
+    document.querySelector('.hamburger')?.classList.remove('active');
+    document.querySelector('.overlay')?.classList.remove('active');
+  }));
+
+  // Calendar init with responsive toolbar & view
+  document.addEventListener('DOMContentLoaded', () => {
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return;
+
+    let calendar = null;
+
+    function getAvailableHeight(){
+      const navbar = document.querySelector('.navbar');
+      const navBottom = navbar ? navbar.getBoundingClientRect().bottom : 80;
+      const footerHeight = 60;
+      return Math.max(window.innerHeight - navBottom - footerHeight - 32, 320);
+    }
+
+    function toolbarForWidth(w){
+      if (w <= 420) return { left: 'prev,next', center: 'title', right: 'listWeek' };
+      if (w <= 768) return { left: 'prev,next today', center: 'title', right: 'timeGridDay,listWeek' };
+      return { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' };
+    }
+
+    function initialViewForWidth(w){
+      if (w <= 420) return 'listWeek';
+      if (w <= 768) return 'timeGridDay';
+      return 'dayGridMonth';
+    }
+
+    function initCalendar(){
+      if (calendar) try{ calendar.destroy(); }catch(e){}
+      const w = window.innerWidth;
+      const view = initialViewForWidth(w);
+      const toolbar = toolbarForWidth(w);
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: view,
+        locale: 'fr',
+        headerToolbar: toolbar,
+        height: getAvailableHeight(),
+        expandRows: true,
+        nowIndicator: true,
+        dayMaxEventRows: true,
+        events: [],
+        editable:false,
+        selectable:true
+      });
+      calendar.render();
+      calendarEl._fc = calendar;
+    }
+
+    initCalendar();
+
+    let resizeTimer;
+    window.addEventListener('resize', ()=>{
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(()=>{ initCalendar(); }, 140);
+    });
+  });
+
+  // Mobile menu toggle
+  const hamburger = document.querySelector('.hamburger');
+  const mobileMenu = document.querySelector('.mobile-menu');
+  const overlay = document.querySelector('.overlay');
+  if (hamburger){
+    hamburger.addEventListener('click', ()=>{
+      hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('active');
+      overlay.classList.toggle('active');
+    });
+  }
+  if (overlay){
+    overlay.addEventListener('click', ()=>{
+      hamburger.classList.remove('active');
+      mobileMenu.classList.remove('active');
+      overlay.classList.remove('active');
+    });
+  }
+
+  </script>
+</body>
+</html>
