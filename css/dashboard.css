@@ -391,12 +391,16 @@ footer{ text-align:center; color:var(--muted); margin-top:18px; font-size:0.9rem
     display: none;
   }
 
+  #clientsListMobile {
+    display: block;
+  }
+
   .client-card {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.1);
     border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    padding: 12px;
+    margin: 8px 0;
+    backdrop-filter: blur(6px);
   }
 
   .client-card p {
@@ -407,6 +411,14 @@ footer{ text-align:center; color:var(--muted); margin-top:18px; font-size:0.9rem
   #clientsListMobile {
     display: block;
   }
+}
+
+.clients-table-wrapper {
+  display: block;
+}
+
+#clientsListMobile {
+  display: none;
 }
 
 

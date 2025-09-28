@@ -2,6 +2,9 @@ import { auth, db } from "./firebase-config.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { collection, addDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, query, where  } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
+const sessionsRef = collection(db, "sessions");
+const clientsRef = collection(db, "clients");
+
 // affichage utilisateur
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -133,12 +136,12 @@ if (overlay){
   });
 }
 
-// Référence collection
-const clientsRef = collection(db, "clients");
 
 // Formulaire
 const addClientForm = document.getElementById("addClientForm");
 const clientsList = document.getElementById("clientsList");
+const clientsListMobile = document.getElementById("clientsListMobile");
+
 
 // Soumission du formulaire
 if (addClientForm) {
@@ -172,18 +175,17 @@ const sessionClientSelect = document.getElementById("sessionClient");
 if (clientsList) {
   onSnapshot(clientsRef, (snapshot) => {
     clientsList.innerHTML = "";
-    if (sessionClientSelect) {
-      sessionClientSelect.innerHTML = ""; // reset options
-    }
+    if (clientsListMobile) clientsListMobile.innerHTML = ""; // reset affichage mobile
+    if (sessionClientSelect) sessionClientSelect.innerHTML = ""; // reset options
 
     snapshot.forEach((doc) => {
       const client = doc.data();
-      const tr = document.createElement("tr");
-
-      const createdAt = client.createdAt?.toDate 
-        ? client.createdAt.toDate().toLocaleDateString("fr-FR") 
+      const createdAt = client.createdAt?.toDate
+        ? client.createdAt.toDate().toLocaleDateString("fr-FR")
         : "-";
 
+      // ===== Table desktop =====
+      const tr = document.createElement("tr");
       tr.innerHTML = `
         <td><strong>${client.name}</strong></td>
         <td>${client.email || ""}</td>
@@ -193,7 +195,21 @@ if (clientsList) {
       `;
       clientsList.appendChild(tr);
 
-      // Ajout dans le select du formulaire sessions
+      // ===== Cartes mobile =====
+      if (clientsListMobile) {
+        const card = document.createElement("div");
+        card.className = "client-card";
+        card.innerHTML = `
+          <p><strong>${client.name}</strong></p>
+          <p>Email : ${client.email || "-"}</p>
+          <p>Téléphone : ${client.phone || "-"}</p>
+          <p>Notes : ${client.notes || "-"}</p>
+          <p>Créé le : ${createdAt}</p>
+        `;
+        clientsListMobile.appendChild(card);
+      }
+
+      // ===== Select sessions =====
       if (sessionClientSelect) {
         const option = document.createElement("option");
         option.value = doc.id;
@@ -202,6 +218,7 @@ if (clientsList) {
       }
     });
   });
+
 }
 
 function showToast(message) {
@@ -217,8 +234,6 @@ function showToast(message) {
   }, 3000);
 }
 
-// Référence à la collection sessions
-const sessionsRef = collection(db, "sessions");
 
 const addSessionForm = document.getElementById("addSessionForm");
 
