@@ -1,7 +1,6 @@
 import { auth, db } from "./firebase-config.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { collection, addDoc, getDocs, onSnapshot, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-
+import { collection, addDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, query, where  } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 // affichage utilisateur
 onAuthStateChanged(auth, (user) => {
@@ -9,6 +8,9 @@ onAuthStateChanged(auth, (user) => {
     const name = user.email ? user.email.split('@')[0] : 'Utilisateur';
     const el = document.getElementById('welcomeMessage');
     if (el) el.textContent = `Bienvenue ${name}`;
+
+    // Une fois connecté, on lance le calendrier filtré
+    initCalendar(user.uid);
   } else {
     window.location.href = 'login.html';
   }
@@ -38,35 +40,36 @@ navButtons.forEach(btn => btn.addEventListener('click', () => {
 }));
 
 // Calendar init
-document.addEventListener('DOMContentLoaded', () => {
+function initCalendar(userId) {
   const calendarEl = document.getElementById('calendar');
   if (!calendarEl) return;
 
   let calendar = null;
 
-  function getAvailableHeight(){
+  function getAvailableHeight() {
     const navbar = document.querySelector('.navbar');
     const navBottom = navbar ? navbar.getBoundingClientRect().bottom : 80;
     const footerHeight = 60;
     return Math.max(window.innerHeight - navBottom - footerHeight - 32, 320);
   }
 
-  function toolbarForWidth(w){
+  function toolbarForWidth(w) {
     if (w <= 420) return { left: 'prev,next', center: 'title', right: 'listWeek' };
     if (w <= 768) return { left: 'prev,next today', center: 'title', right: 'timeGridDay,listWeek' };
     return { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' };
   }
 
-  function initialViewForWidth(w){
+  function initialViewForWidth(w) {
     if (w <= 420) return 'listWeek';
     if (w <= 768) return 'timeGridDay';
     return 'dayGridMonth';
   }
 
-  function initCalendar(){
-    if (calendar) try{ calendar.destroy(); }catch(e){}
+  function buildCalendar() {
+    if (calendar) try { calendar.destroy(); } catch (e) {}
+
     const w = window.innerWidth;
-    const view = initialViewForWidth(w);
+    const view = 'timeGridWeek';
     const toolbar = toolbarForWidth(w);
 
     calendar = new FullCalendar.Calendar(calendarEl, {
@@ -83,8 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     calendar.render();
 
-    // Synchronisation avec Firestore
-    onSnapshot(sessionsRef, (snapshot) => {
+    // Synchro Firestore filtrée par userId
+    const q = query(sessionsRef, where("userId", "==", userId));
+    onSnapshot(q, (snapshot) => {
       const events = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -101,15 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
     calendarEl._fc = calendar;
   }
 
-
-  initCalendar();
+  buildCalendar();
 
   let resizeTimer;
-  window.addEventListener('resize', ()=>{
+  window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(()=>{ initCalendar(); }, 140);
+    resizeTimer = setTimeout(() => { buildCalendar(); }, 140);
   });
-});
+}
 
 // Mobile menu toggle
 const hamburger = document.querySelector('.hamburger');
@@ -241,8 +244,10 @@ if (addSessionForm) {
         hours,
         start: Timestamp.fromDate(start),
         end: Timestamp.fromDate(end),
+        userId: auth.currentUser.uid,
         createdAt: serverTimestamp()
       });
+
       showToast(`Session ajoutée pour ${clientName}`);
       addSessionForm.reset();
     } catch (err) {

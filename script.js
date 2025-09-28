@@ -1,5 +1,6 @@
 // script.js
-import { auth } from "./firebase-config.js";
+import { auth } from "./js/firebase-config.js";
+
 import { 
   onAuthStateChanged, 
   setPersistence, 
