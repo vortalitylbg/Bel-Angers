@@ -1,14 +1,24 @@
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+// script.js
+import { auth } from "./firebase-config.js";
+import { 
+  onAuthStateChanged, 
+  setPersistence, 
+  browserLocalPersistence 
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 
-
-const auth = getAuth();
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // utilisateur déjà connecté → redirection
-    window.location.href = "dashboard.html";
-  }
+// Force la persistance → l'utilisateur reste logué même après refresh
+setPersistence(auth, browserLocalPersistence).then(() => {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.location.href = "dashboard.html";
+    }
+  });
+}).catch((error) => {
+  console.error("Erreur de persistance:", error);
 });
 
+
+// === Ton animation canvas ===
 const canvas = document.getElementById("bgCanvas");
 const ctx = canvas.getContext("2d");
 let particles = [];
@@ -32,7 +42,7 @@ function initParticles() {
       r: rand(1, 3),
       vx: rand(-0.4, 0.4),
       vy: rand(-0.4, 0.4),
-      hue: rand(180, 220), // bleu/vert discret
+      hue: rand(180, 220),
       alpha: rand(0.15, 0.4)
     });
   }
@@ -41,7 +51,6 @@ function initParticles() {
 function draw() {
   ctx.clearRect(0, 0, W, H);
 
-  // fond léger
   const gradient = ctx.createLinearGradient(0, 0, W, H);
   gradient.addColorStop(0, "rgba(124,58,237,0.05)");
   gradient.addColorStop(1, "rgba(110,231,183,0.05)");
