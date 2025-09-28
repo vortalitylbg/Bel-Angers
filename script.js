@@ -1,3 +1,14 @@
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+
+const auth = getAuth();
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // utilisateur déjà connecté → redirection
+    window.location.href = "dashboard.html";
+  }
+});
+
 const canvas = document.getElementById("bgCanvas");
 const ctx = canvas.getContext("2d");
 let particles = [];

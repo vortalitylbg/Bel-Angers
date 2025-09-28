@@ -243,10 +243,10 @@ if (addSessionForm) {
         end: Timestamp.fromDate(end),
         createdAt: serverTimestamp()
       });
-      showToast(`✅ Session ajoutée pour ${clientName}`);
+      showToast(`Session ajoutée pour ${clientName}`);
       addSessionForm.reset();
     } catch (err) {
-      showToast("❌ Erreur ajout session: " + err.message);
+      showToast("Erreur ajout session: " + err.message);
       console.error("Erreur ajout session:", err);
     }
   });
