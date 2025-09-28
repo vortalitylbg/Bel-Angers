@@ -83,3 +83,127 @@
     font-size: 1.8rem;
   }
 }
+
+
+/* Bouton secondaire "Changer le mot de passe" */
+.btn.secondary {
+  width: 100%;
+  margin-top: 0.8rem;
+  padding: 1rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.15);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn.secondary:hover {
+  background: rgba(255,255,255,0.15);
+  transform: scale(1.02);
+}
+
+/* Modal avec style glassmorphism */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none; /* affiché dynamiquement via JS */
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4); /* fond semi-transparent */
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+
+.modal-content {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  animation: fadeInModal 0.3s ease-out;
+}
+
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Titre du modal */
+.modal-content h2 {
+  margin-bottom: 1.2rem;
+  font-size: 1.4rem;
+  color: var(--text);
+  text-align: center;
+}
+
+/* Champs du modal (mêmes styles que formulaire login) */
+.modal-content label,
+.modal-content select {
+  display: block;
+  width: 100%;
+}
+
+.modal-content select {
+  margin-top: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.modal-content select:focus {
+  background: rgba(255,255,255,0.15);
+  transform: scale(1.02);
+}
+
+/* Bouton du modal */
+#sendReset {
+  width: 100%;
+  padding: 0.9rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  background: var(--accent, #3b82f6);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+#sendReset:hover {
+  background: #2563eb;
+  transform: scale(1.02);
+}
+
+/* Bouton de fermeture */
+.modal .close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 1.8rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.modal .close:hover {
+  transform: scale(1.2);
+}
+
+@media (max-width: 500px) {
+  .modal-content {
+    padding: 1.8rem;
+    max-width: 90%;
+  }
+}

@@ -15,13 +15,14 @@
     <div class="login-box">
       <h1>Connexion</h1>
       <form class="login-form">
-        <label for="employee">Employé</label>
+        <label for="employee">Utilisateur</label>
         <select id="employee" name="employee" required>
-          <option value="">-- Sélectionnez un employé --</option>
+          <option value="">-- Sélectionnez un utilisateur --</option>
           <option value="julien">Julien</option>
           <option value="ludovic">Ludovic</option>
           <option value="justine">Justine</option>
           <option value="yannick">Yannick</option>
+          <option value="admin">Admin</option>
         </select>
 
         <label for="password">Mot de passe</label>
@@ -29,8 +30,33 @@
 
         <button type="submit" class="btn primary">Se connecter</button>
       </form>
+
+      <!-- Bouton sous le formulaire -->
+      <button type="button" id="resetPasswordBtn" class="btn secondary">
+        Changer le mot de passe
+      </button>
     </div>
   </main>
+
+  <!-- Modal -->
+  <div id="resetModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Réinitialisation du mot de passe</h2>
+
+      <label for="resetEmployee">Utilisateur</label>
+      <select id="resetEmployee" name="resetEmployee" required>
+        <option value="">-- Sélectionnez un utilisateur --</option>
+        <option value="julien">Julien</option>
+        <option value="ludovic">Ludovic</option>
+        <option value="justine">Justine</option>
+        <option value="yannick">Yannick</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <button id="sendReset" class="btn primary">Envoyer le lien</button>
+    </div>
+  </div>
 
 
   <footer>
