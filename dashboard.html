@@ -81,28 +81,44 @@
         <button type="submit" class="btn glass-btn">Ajouter une session</button>
       </form>
 
-
-      <h2>Liste des clients</h2>
       <!-- Tableau des clients -->
-      <table class="clients-table" id="clientsTable">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Email</th>
-            <th>Téléphone</th>
-            <th>Notes</th>
-            <th>Créé le</th>
-          </tr>
-        </thead>
-        <tbody id="clientsList"></tbody>
-      </table>
+      <h2>Liste des clients</h2>
+      <div class="clients-table-wrapper">
+        <table class="clients-table" id="clientsTable">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>Téléphone</th>
+              <th>Notes</th>
+              <th>Créé le</th>
+            </tr>
+          </thead>
+          <tbody id="clientsList"></tbody>
+        </table>
+      </div>
+      <div id="clientsListMobile" style="display: none;"></div>
 
     </section>
 
 
     <section id="statsSection" class="dashboard-section">
-      <h2 class="first-h2">Statistiques</h2>
-      <p>[Graphiques Chart.js bientôt ici]</p>
+      <div class="stats-container">
+      <div class="stats-summary">
+        <p><strong>Total d’heures :</strong> <span id="totalHours">–</span></p>
+      </div>
+
+      <div class="chart-block">
+        <h3>Répartition des heures par client</h3>
+        <canvas id="clientHoursChart"></canvas>
+      </div>
+
+      <div class="chart-block">
+        <h3>Sessions par mois</h3>
+        <canvas id="monthlySessionsChart"></canvas>
+      </div>
+    </div>
+
     </section>
   </main>
 
@@ -114,6 +130,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <script type="module" src="js/firebase-config.js"></script>
   <script type="module" src="js/dashboard.js"></script>

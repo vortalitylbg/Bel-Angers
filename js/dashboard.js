@@ -264,3 +264,79 @@ if (addSessionForm) {
     }
   });
 }
+
+async function loadStats() {
+  const snapshot = await getDocs(sessionsRef);
+  const sessions = [];
+  snapshot.forEach(doc => sessions.push(doc.data()));
+
+  // Total heures
+  const totalHours = sessions.reduce((sum, s) => sum + (s.hours || 0), 0);
+  document.getElementById("totalHours").textContent = totalHours.toFixed(1) + " h";
+
+  // Heures par client
+  const clientHours = {};
+  sessions.forEach(s => {
+    if (!clientHours[s.clientName]) clientHours[s.clientName] = 0;
+    clientHours[s.clientName] += s.hours || 0;
+  });
+
+  const clientLabels = Object.keys(clientHours);
+  const clientData = Object.values(clientHours);
+
+  new Chart(document.getElementById("clientHoursChart"), {
+    type: "bar",
+    data: {
+      labels: clientLabels,
+      datasets: [{
+        label: "Heures",
+        data: clientData,
+        backgroundColor: "#4CAF50"
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: false
+        }
+      }
+    }
+  });
+
+  // Sessions par mois
+  const monthlyCounts = {};
+  sessions.forEach(s => {
+    const date = s.start?.toDate?.() || new Date();
+    const key = date.toLocaleDateString("fr-FR", { month: "short", year: "numeric" });
+    monthlyCounts[key] = (monthlyCounts[key] || 0) + 1;
+  });
+
+  const monthLabels = Object.keys(monthlyCounts);
+  const monthData = Object.values(monthlyCounts);
+
+  new Chart(document.getElementById("monthlySessionsChart"), {
+    type: "line",
+    data: {
+      labels: monthLabels,
+      datasets: [{
+        label: "Sessions",
+        data: monthData,
+        borderColor: "#2196F3",
+        backgroundColor: "rgba(33,150,243,0.2)",
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: false
+        }
+      }
+    }
+  });
+}
+
+// Appel au chargement
+loadStats();
