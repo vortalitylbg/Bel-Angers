@@ -229,13 +229,21 @@ if (addSessionForm) {
     const clientId = document.getElementById("sessionClient").value;
     const clientName = document.getElementById("sessionClient").selectedOptions[0].textContent;
     const date = document.getElementById("sessionDate").value;
-    const time = document.getElementById("sessionTime").value;
-    const hours = parseInt(document.getElementById("sessionHours").value, 10);
+    const startTime = document.getElementById("sessionTime").value;
+    const endTime = document.getElementById("sessionEndTime").value;
 
-    if (!date || !time || !hours) return;
+    if (!date || !startTime || !endTime) return;
 
-    const start = new Date(`${date}T${time}`);
-    const end = new Date(start.getTime() + hours * 60 * 60 * 1000);
+    const start = new Date(`${date}T${startTime}`);
+    const end = new Date(`${date}T${endTime}`);
+
+    if (end <= start) {
+      showToast("L'heure de fin doit être après l'heure de début.");
+      return;
+    }
+
+    const durationMs = end - start;
+    const hours = durationMs / (1000 * 60 * 60); // convert ms to hours
 
     try {
       await addDoc(sessionsRef, {
