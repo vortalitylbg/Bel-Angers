@@ -558,3 +558,55 @@ footer{ text-align:center; color:var(--muted); margin-top:18px; font-size:0.9rem
     min-height: 220px;
   }
 }
+
+
+/* ==== Modal session ==== */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1500;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  justify-content: center;
+  align-items: center;
+}
+.modal.active {
+  display: flex;
+}
+.modal-content {
+  background: rgba(30,30,40,0.95);
+  padding: 1.5rem;
+  border-radius: 16px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+  color: var(--text);
+}
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+.modal-content label {
+  font-weight: 600;
+  margin-top: 0.6rem;
+  display: block;
+}
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+}
+.modal-content .close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}

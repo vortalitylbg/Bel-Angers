@@ -123,6 +123,34 @@
     </section>
   </main>
 
+  <!-- Modal gestion session -->
+  <div id="sessionModal" class="modal">
+    <div class="modal-content glass">
+      <span class="close" id="closeSessionModal">&times;</span>
+      <h3>Gestion de la session</h3>
+
+      <form id="editSessionForm">
+        <label for="editSessionClient">Client</label>
+        <select id="editSessionClient"></select>
+
+        <label for="editSessionDate">Date</label>
+        <input type="date" id="editSessionDate" required>
+
+        <label for="editSessionTime">Heure de début</label>
+        <input type="time" id="editSessionTime" required>
+
+        <label for="editSessionEndTime">Heure de fin</label>
+        <input type="time" id="editSessionEndTime" required>
+
+        <div style="display:flex;justify-content:space-between;margin-top:1rem;">
+          <button type="submit" class="btn glass-btn">Enregistrer</button>
+          <button type="button" id="deleteSessionBtn" class="btn glass-btn danger">Supprimer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
   <footer>
     <p>© 2025 Bel'Angers — Application interne</p>
   </footer>

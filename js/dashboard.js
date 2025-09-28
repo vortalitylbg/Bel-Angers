@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase-config.js";
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { collection, addDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, query, where  } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, query, where, doc, updateDoc, deleteDoc  } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 const sessionsRef = collection(db, "sessions");
 const clientsRef = collection(db, "clients");
@@ -70,26 +70,23 @@ function initCalendar(userId) {
 
   function buildCalendar() {
     if (calendar) try { calendar.destroy(); } catch (e) {}
-
-    const w = window.innerWidth;
-    const view = 'timeGridWeek';
-    const toolbar = toolbarForWidth(w);
+    const toolbar = toolbarForWidth(window.innerWidth);
 
     calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: view,
+      initialView: 'timeGridWeek',
       locale: 'fr',
       headerToolbar: toolbar,
       height: getAvailableHeight(),
-      expandRows: true,
       nowIndicator: true,
-      dayMaxEventRows: true,
-      editable: false,
       selectable: true,
-      events: []
+      events: [],
+      eventClick: (info) => {
+        openSessionModal(info.event);
+      }
     });
     calendar.render();
 
-    // Synchro Firestore filtrée par userId
+    // synchro Firestore
     const q = query(sessionsRef, where("userId", "==", userId));
     onSnapshot(q, (snapshot) => {
       const events = snapshot.docs.map(doc => {
@@ -98,23 +95,17 @@ function initCalendar(userId) {
           id: doc.id,
           title: `${data.clientName} (${data.hours}h)`,
           start: data.start.toDate(),
-          end: data.end.toDate()
+          end: data.end.toDate(),
+          extendedProps: { ...data }
         };
       });
       calendar.removeAllEvents();
       calendar.addEventSource(events);
     });
-
-    calendarEl._fc = calendar;
   }
 
   buildCalendar();
-
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { buildCalendar(); }, 140);
-  });
+  window.addEventListener('resize', () => { buildCalendar(); });
 }
 
 // Mobile menu toggle
@@ -352,6 +343,77 @@ async function loadStats() {
     }
   });
 }
+
+
+// Gestion du modal session
+const sessionModal = document.getElementById("sessionModal");
+const closeSessionModal = document.getElementById("closeSessionModal");
+const editSessionForm = document.getElementById("editSessionForm");
+const deleteSessionBtn = document.getElementById("deleteSessionBtn");
+
+let currentSessionId = null;
+
+function openSessionModal(event) {
+  currentSessionId = event.id;
+
+  // pré-remplir les champs
+  document.getElementById("editSessionClient").value = event.extendedProps.clientId;
+  document.getElementById("editSessionDate").value = event.start.toISOString().split("T")[0];
+  document.getElementById("editSessionTime").value = event.start.toISOString().substr(11,5);
+  document.getElementById("editSessionEndTime").value = event.end.toISOString().substr(11,5);
+
+  sessionModal.classList.add("active");
+}
+
+if (closeSessionModal) {
+  closeSessionModal.addEventListener("click", () => sessionModal.classList.remove("active"));
+}
+
+if (editSessionForm) {
+  editSessionForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!currentSessionId) return;
+
+    const clientId = document.getElementById("editSessionClient").value;
+    const clientName = document.getElementById("editSessionClient").selectedOptions[0].textContent;
+    const date = document.getElementById("editSessionDate").value;
+    const startTime = document.getElementById("editSessionTime").value;
+    const endTime = document.getElementById("editSessionEndTime").value;
+
+    const start = new Date(`${date}T${startTime}`);
+    const end = new Date(`${date}T${endTime}`);
+    const hours = (end - start) / (1000 * 60 * 60);
+
+    try {
+      const ref = doc(db, "sessions", currentSessionId);
+      await updateDoc(ref, {
+        clientId, clientName, start: Timestamp.fromDate(start),
+        end: Timestamp.fromDate(end), hours
+      });
+      showToast("Session modifiée !");
+      sessionModal.classList.remove("active");
+    } catch (err) {
+      showToast("Erreur modif session : " + err.message);
+    }
+  });
+}
+
+if (deleteSessionBtn) {
+  deleteSessionBtn.addEventListener("click", async () => {
+    if (!currentSessionId) return;
+    if (!confirm("Supprimer cette session ?")) return;
+
+    try {
+      const ref = doc(db, "sessions", currentSessionId);
+      await deleteDoc(ref);
+      showToast("Session supprimée !");
+      sessionModal.classList.remove("active");
+    } catch (err) {
+      showToast("Erreur suppression : " + err.message);
+    }
+  });
+}
+
 
 // Appel au chargement
 loadStats();
