@@ -3,193 +3,422 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Bel'Angers — Tableau de bord (responsive fix)</title>
+  <title>Bel'Angers — Tableau de bord</title>
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="shortcut icon" href="images/favicon.jpg" type="image/x-icon">
 </head>
 <body>
+  <!-- Background Canvas -->
   <canvas id="bgCanvas"></canvas>
 
+  <!-- Navigation Bar -->
   <header>
     <nav class="navbar glass">
-      <div class="nav-left">
-        <span class="brand">Bel'Anger</span>
-        <span id="welcomeMessage" class="welcome-text">Bienvenue</span>
+      <div class="nav-brand">
+        <span class="brand-logo">Bel'Angers</span>
+        <span id="welcomeMessage" class="welcome-badge">Bienvenue</span>
       </div>
 
-      <ul class="nav-links">
-        <li><button class="nav-btn" data-section="calendar">Calendrier</button></li>
-        <li><button class="nav-btn" data-section="clients">Clients</button></li>
-        <li><button class="nav-btn" data-section="stats">Statistiques</button></li>
+      <ul class="nav-menu">
+        <li><button class="nav-btn active" data-section="calendar">
+          <span class="nav-label">Calendrier</span>
+        </button></li>
+        <li><button class="nav-btn" data-section="clients">
+          <span class="nav-label">Clients</span>
+        </button></li>
+        <li><button class="nav-btn" data-section="sessions">
+          <span class="nav-label">Sessions</span>
+        </button></li>
+        <li><button class="nav-btn" data-section="stats">
+          <span class="nav-label">Statistiques</span>
+        </button></li>
       </ul>
 
       <div class="nav-actions">
-        <button class="btn glass-btn danger" id="logoutBtn">Déconnexion</button>
+        <button class="btn-logout" id="logoutBtn">
+          <span>Déconnexion</span>
+        </button>
       </div>
 
-      <div class="hamburger" aria-label="Menu" role="button">
-        <span></span><span></span><span></span>
-      </div>
+      <!-- Mobile Hamburger -->
+      <button class="hamburger" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </nav>
 
-    <div class="mobile-menu" aria-hidden="true">
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+      <div class="mobile-menu-header">
+        <span class="brand-logo">Bel'Angers</span>
+        <button class="close-mobile-menu" aria-label="Fermer">&times;</button>
+      </div>
       <ul>
-        <li><button class="nav-btn" data-section="calendar">Calendrier</button></li>
-        <li><button class="nav-btn" data-section="clients">Clients</button></li>
-        <li><button class="nav-btn" data-section="stats">Statistiques</button></li>
-        <li><button class="btn glass-btn danger" id="logoutBtnMobile">Déconnexion</button></li>
+        <li><button class="nav-btn" data-section="calendar">
+          Calendrier
+        </button></li>
+        <li><button class="nav-btn" data-section="clients">
+          Clients
+        </button></li>
+        <li><button class="nav-btn" data-section="sessions">
+          Sessions
+        </button></li>
+        <li><button class="nav-btn" data-section="stats">
+          Statistiques
+        </button></li>
+        <li class="divider"></li>
+        <li><button class="btn-logout" id="logoutBtnMobile">Déconnexion</button></li>
       </ul>
     </div>
 
+    <!-- Overlay -->
     <div class="overlay"></div>
   </header>
 
-
-  <main class="dashboard-main">
-    <section id="calendarSection" class="dashboard-section active">
-      <h2 class="first-h2">Votre calendrier</h2>
-      <div id="calendar"></div>
+  <!-- Main Content -->
+  <main class="dashboard-container">
+    
+    <!-- SECTION: CALENDRIER -->
+    <section id="calendarSection" class="section active">
+      <div class="section-header">
+        <h1 class="section-title">Calendrier</h1>
+        <p class="section-subtitle">Visualisez et gérez vos sessions</p>
+      </div>
+      
+      <div class="calendar-wrapper glass">
+        <div id="calendar"></div>
+      </div>
     </section>
 
-    <section id="clientsSection" class="dashboard-section">
-      <h2 class="first-h2">Ajouter un client</h2>
-
-      <!-- Formulaire ajout client -->
-      <form id="addClientForm" class="glass client-form">
-        <input type="text" id="clientName" placeholder="Nom complet" required>
-        <input type="email" id="clientEmail" placeholder="Email" required>
-        <input type="tel" id="clientPhone" placeholder="Téléphone">
-        <textarea id="clientNotes" placeholder="Notes"></textarea>
-        <button type="submit" class="btn glass-btn">Ajouter</button>
-      </form>
-
-      <h2>Ajouter une session</h2>
-      <!-- Formulaire ajout heures -->
-      <form id="addSessionForm" class="glass session-form">
-        <label for="sessionClient">Client</label>
-        <select id="sessionClient" required></select>
-
-        <label for="sessionDate">Date</label>
-        <input type="date" id="sessionDate" required>
-
-        <label for="sessionTime">Heure de début</label>
-        <input type="time" id="sessionTime" required>
-
-        <label for="sessionEndTime">Heure de fin</label>
-          <input type="time" id="sessionEndTime" required>
-
-        <button type="submit" class="btn glass-btn">Ajouter une session</button>
-      </form>
-
-      <!-- Tableau des clients -->
-      <h2>Liste des clients</h2>
-      <div class="clients-table-wrapper">
-        <table class="clients-table" id="clientsTable">
-          <thead>
-            <tr>
-              <th>Nom</th>
-              <th>Email</th>
-              <th>Téléphone</th>
-              <th>Notes</th>
-              <th>Créé le</th>
-            </tr>
-          </thead>
-          <tbody id="clientsList"></tbody>
-        </table>
+    <!-- SECTION: CLIENTS -->
+    <section id="clientsSection" class="section">
+      <div class="section-header">
+        <h1 class="section-title">Gestion des Clients</h1>
+        <p class="section-subtitle">Ajoutez et consultez vos clients</p>
       </div>
-      <div id="clientsListMobile"></div>
 
+      <!-- Add Client Card -->
+      <div class="card glass">
+        <div class="card-header">
+          <h2 class="card-title">Ajouter un nouveau client</h2>
+        </div>
+        <form id="addClientForm" class="form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="clientName">Nom complet *</label>
+              <input type="text" id="clientName" placeholder="Ex: Marie Dupont" required>
+            </div>
+            <div class="form-group">
+              <label for="clientEmail">Email *</label>
+              <input type="email" id="clientEmail" placeholder="marie.dupont@email.com" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="clientPhone">Téléphone</label>
+              <input type="tel" id="clientPhone" placeholder="06 12 34 56 78">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="clientNotes">Notes</label>
+            <textarea id="clientNotes" placeholder="Informations complémentaires..." rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <span>✓</span> Ajouter le client
+          </button>
+        </form>
+      </div>
+
+      <!-- Clients List -->
+      <div class="card glass">
+        <div class="card-header">
+          <h2 class="card-title">Liste des clients</h2>
+          <span id="clientCount" class="badge">0</span>
+        </div>
+        
+        <!-- Desktop Table -->
+        <div class="table-wrapper">
+          <table class="data-table" id="clientsTable">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Notes</th>
+                <th>Ajouté le</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="clientsList"></tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div id="clientsListMobile" class="mobile-cards"></div>
+      </div>
     </section>
 
-
-    <section id="statsSection" class="dashboard-section">
-      <div class="stats-container">
-      <div class="stats-summary">
-        <p><strong>Total d’heures :</strong> <span id="totalHours">–</span></p>
+    <!-- SECTION: SESSIONS -->
+    <section id="sessionsSection" class="section">
+      <div class="section-header">
+        <h1 class="section-title">⏱️ Gestion des Sessions</h1>
+        <p class="section-subtitle">Planifiez vos rendez-vous</p>
       </div>
 
-      <div class="chart-block">
-        <h3>Répartition des heures par client</h3>
-        <canvas id="clientHoursChart"></canvas>
+      <!-- Add Session Card -->
+      <div class="card glass">
+        <div class="card-header">
+          <h2 class="card-title">Planifier une session</h2>
+        </div>
+        <form id="addSessionForm" class="form">
+          <div class="form-group">
+            <label for="sessionClient">Client *</label>
+            <select id="sessionClient" required>
+              <option value="">Sélectionnez un client</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sessionDate">Date *</label>
+              <input type="date" id="sessionDate" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sessionTime">Heure de début *</label>
+              <input type="time" id="sessionTime" required>
+            </div>
+            <div class="form-group">
+              <label for="sessionEndTime">Heure de fin *</label>
+              <input type="time" id="sessionEndTime" required>
+            </div>
+          </div>
+          <div class="form-info">
+            <span id="sessionDuration">Durée: --</span>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <span>✓</span> Ajouter la session
+          </button>
+        </form>
       </div>
 
-      <div class="chart-block">
-        <h3>Sessions par mois</h3>
-        <canvas id="monthlySessionsChart"></canvas>
+      <!-- Recent Sessions -->
+      <div class="card glass">
+        <div class="card-header">
+          <h2 class="card-title">Sessions récentes</h2>
+          <span id="sessionCount" class="badge">0</span>
+        </div>
+        <div id="recentSessionsList" class="sessions-list"></div>
       </div>
-    </div>
-
     </section>
+
+    <!-- SECTION: STATISTIQUES -->
+    <section id="statsSection" class="section">
+      <div class="section-header">
+        <h1 class="section-title">Statistiques</h1>
+        <p class="section-subtitle">Analysez votre activité</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card glass">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-content">
+            <div class="stat-label">Total d'heures</div>
+            <div class="stat-value" id="totalHours">0h</div>
+          </div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-icon">📅</div>
+          <div class="stat-content">
+            <div class="stat-label">Sessions totales</div>
+            <div class="stat-value" id="totalSessions">0</div>
+          </div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-icon">👥</div>
+          <div class="stat-content">
+            <div class="stat-label">Clients actifs</div>
+            <div class="stat-value" id="activeClients">0</div>
+          </div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-icon">📈</div>
+          <div class="stat-content">
+            <div class="stat-label">Moyenne/session</div>
+            <div class="stat-value" id="avgHours">0h</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <div class="card glass">
+          <div class="card-header">
+            <h3 class="card-title">Heures par client</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="clientHoursChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card glass">
+          <div class="card-header">
+            <h3 class="card-title">Sessions par mois</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="monthlySessionsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <!-- Modal gestion session -->
+  <!-- MODAL: Edit Session -->
   <div id="sessionModal" class="modal">
     <div class="modal-content glass">
-      <span class="close" id="closeSessionModal">&times;</span>
-      <h3>Gestion de la session</h3>
-
+      <div class="modal-header">
+        <h3 class="modal-title">Modifier la session</h3>
+        <button class="modal-close" id="closeSessionModal">&times;</button>
+      </div>
+      
       <form id="editSessionForm">
-        <label>Client</label>
-        <p id="editSessionClientName" class="readonly-field"></p>
+        <div class="form-group">
+          <label>Client</label>
+          <div class="readonly-field" id="editSessionClientName">--</div>
+        </div>
 
+        <div class="form-group">
+          <label for="editSessionDate">Date</label>
+          <input type="date" id="editSessionDate" required>
+        </div>
 
-        <label for="editSessionDate">Date</label>
-        <input type="date" id="editSessionDate" required>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editSessionTime">Début</label>
+            <input type="time" id="editSessionTime" required>
+          </div>
+          <div class="form-group">
+            <label for="editSessionEndTime">Fin</label>
+            <input type="time" id="editSessionEndTime" required>
+          </div>
+        </div>
 
-        <label for="editSessionTime">Heure de début</label>
-        <input type="time" id="editSessionTime" required>
+        <div class="form-info">
+          <span id="editSessionDuration">Durée: --</span>
+        </div>
 
-        <label for="editSessionEndTime">Heure de fin</label>
-        <input type="time" id="editSessionEndTime" required>
-
-        <div style="display:flex;justify-content:space-between;margin-top:1rem;">
-          <button type="submit" class="btn glass-btn">Enregistrer</button>
-          <button type="button" id="deleteSessionBtn" class="btn glass-btn danger">Supprimer</button>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">
+            <span>✓</span> Enregistrer
+          </button>
+          <button type="button" id="deleteSessionBtn" class="btn btn-danger">
+            <span>🗑️</span> Supprimer
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL AJOUT SESSION -->
+  <!-- MODAL: Quick Add Session (from calendar) -->
   <div id="addSessionModal" class="modal">
-    <div class="modal-content">
-      <span id="closeAddSessionModal" class="close">&times;</span>
-      <h2>Nouvelle session</h2>
+    <div class="modal-content glass">
+      <div class="modal-header">
+        <h3 class="modal-title">Nouvelle session</h3>
+        <button class="modal-close" id="closeAddSessionModal">&times;</button>
+      </div>
+      
       <form id="quickAddSessionForm">
-        <label for="quickSessionClient">Client</label>
-        <select id="quickSessionClient" required></select>
+        <div class="form-group">
+          <label for="quickSessionClient">Client</label>
+          <select id="quickSessionClient" required>
+            <option value="">Sélectionnez un client</option>
+          </select>
+        </div>
 
-        <label for="quickSessionDate">Date</label>
-        <input type="date" id="quickSessionDate" required>
+        <div class="form-group">
+          <label for="quickSessionDate">Date</label>
+          <input type="date" id="quickSessionDate" required>
+        </div>
 
-        <label for="quickSessionStart">Heure de début</label>
-        <input type="time" id="quickSessionStart" required>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="quickSessionStart">Début</label>
+            <input type="time" id="quickSessionStart" required>
+          </div>
+          <div class="form-group">
+            <label for="quickSessionEnd">Fin</label>
+            <input type="time" id="quickSessionEnd" required>
+          </div>
+        </div>
 
-        <label for="quickSessionEnd">Heure de fin</label>
-        <input type="time" id="quickSessionEnd" required>
+        <div class="form-info">
+          <span id="quickSessionDuration">Durée: --</span>
+        </div>
 
-        <button type="submit" class="btn-primary">Ajouter</button>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">
+            <span>✓</span> Ajouter
+          </button>
+        </div>
       </form>
     </div>
   </div>
 
+  <!-- MODAL: Edit Client -->
+  <div id="editClientModal" class="modal">
+    <div class="modal-content glass">
+      <div class="modal-header">
+        <h3 class="modal-title">Modifier le client</h3>
+        <button class="modal-close" id="closeEditClientModal">&times;</button>
+      </div>
+      
+      <form id="editClientForm">
+        <div class="form-group">
+          <label for="editClientName">Nom complet</label>
+          <input type="text" id="editClientName" required>
+        </div>
+        <div class="form-group">
+          <label for="editClientEmail">Email</label>
+          <input type="email" id="editClientEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="editClientPhone">Téléphone</label>
+          <input type="tel" id="editClientPhone">
+        </div>
+        <div class="form-group">
+          <label for="editClientNotes">Notes</label>
+          <textarea id="editClientNotes" rows="3"></textarea>
+        </div>
 
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">
+            <span>✓</span> Enregistrer
+          </button>
+          <button type="button" id="deleteClientBtn" class="btn btn-danger">
+            Supprimer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-
-  <footer>
-    <p>© 2025 Bel'Angers — Application interne</p>
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 Bel'Angers — Application de gestion</p>
   </footer>
 
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <script type="module" src="js/firebase-config.js"></script>
   <script type="module" src="js/dashboard.js"></script>
-
 </body>
 </html>
