@@ -86,6 +86,30 @@ function initCalendar(userId) {
     });
     calendar.render();
 
+    let pressTimer = null;
+
+    calendarEl.addEventListener("mousedown", (e) => {
+      // Sur FullCalendar 6+, les slots horaires sont souvent des <td> sans classe directe
+      const slot = e.target.closest("td[data-time]");
+      if (!slot) return;
+
+      slot.classList.add("active-slot");
+      pressTimer = setTimeout(() => handleLongPress(slot), 600);
+    });
+
+    calendarEl.addEventListener("mouseup", (e) => {
+      clearTimeout(pressTimer);
+      e.target.closest("td[data-time]")?.classList.remove("active-slot");
+    });
+
+    calendarEl.addEventListener("mouseleave", (e) => {
+      clearTimeout(pressTimer);
+      e.target.closest("td[data-time]")?.classList.remove("active-slot");
+    });
+
+
+
+
     // synchro Firestore
     const q = query(sessionsRef, where("userId", "==", userId));
     onSnapshot(q, (snapshot) => {
@@ -103,6 +127,29 @@ function initCalendar(userId) {
       calendar.addEventSource(events);
     });
   }
+
+  function handleLongPress(cell) {
+    const cellDateStr = cell.getAttribute("data-time");
+    const col = cell.closest("td, th, div[data-date]");
+    const dateStr = col ? col.getAttribute("data-date") : cell.closest("[data-date]")?.getAttribute("data-date");
+
+    if (!dateStr || !cellDateStr) return;
+
+    const start = new Date(`${dateStr}T${cellDateStr}`);
+    const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+
+    document.getElementById("quickSessionDate").value = dateStr;
+    document.getElementById("quickSessionStart").value = start.toISOString().substr(11,5);
+    document.getElementById("quickSessionEnd").value = end.toISOString().substr(11,5);
+
+    // ✅ cette ligne fonctionne maintenant
+    document.getElementById("addSessionModal").classList.add("active");
+
+    showToast("Création d’une session à " + start.toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' }));
+  }
+
+
+
 
   buildCalendar();
   window.addEventListener('resize', () => { buildCalendar(); });
@@ -162,53 +209,64 @@ if (addClientForm) {
 }
 
 const sessionClientSelect = document.getElementById("sessionClient");
+const editSessionClientSelect = document.getElementById("editSessionClient");
+
 // Affichage en temps réel
 if (clientsList) {
   onSnapshot(clientsRef, (snapshot) => {
-    clientsList.innerHTML = "";
-    if (clientsListMobile) clientsListMobile.innerHTML = ""; // reset affichage mobile
-    if (sessionClientSelect) sessionClientSelect.innerHTML = ""; // reset options
+  clientsList.innerHTML = "";
+  if (clientsListMobile) clientsListMobile.innerHTML = "";
+  if (sessionClientSelect) sessionClientSelect.innerHTML = "";
+  if (editSessionClientSelect) editSessionClientSelect.innerHTML = "";
 
-    snapshot.forEach((doc) => {
-      const client = doc.data();
-      const createdAt = client.createdAt?.toDate
-        ? client.createdAt.toDate().toLocaleDateString("fr-FR")
-        : "-";
+  snapshot.forEach((doc) => {
+    const client = doc.data();
+    const createdAt = client.createdAt?.toDate
+      ? client.createdAt.toDate().toLocaleDateString("fr-FR")
+      : "-";
 
-      // ===== Table desktop =====
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><strong>${client.name}</strong></td>
-        <td>${client.email || ""}</td>
-        <td>${client.phone || ""}</td>
-        <td>${client.notes || ""}</td>
-        <td>${createdAt}</td>
+    // Table desktop
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${client.name}</strong></td>
+      <td>${client.email || ""}</td>
+      <td>${client.phone || ""}</td>
+      <td>${client.notes || ""}</td>
+      <td>${createdAt}</td>
+    `;
+    clientsList.appendChild(tr);
+
+    // Cartes mobile
+    if (clientsListMobile) {
+      const card = document.createElement("div");
+      card.className = "client-card";
+      card.innerHTML = `
+        <p><strong>${client.name}</strong></p>
+        <p>Email : ${client.email || "-"}</p>
+        <p>Téléphone : ${client.phone || "-"}</p>
+        <p>Notes : ${client.notes || "-"}</p>
+        <p>Créé le : ${createdAt}</p>
       `;
-      clientsList.appendChild(tr);
+      clientsListMobile.appendChild(card);
+    }
 
-      // ===== Cartes mobile =====
-      if (clientsListMobile) {
-        const card = document.createElement("div");
-        card.className = "client-card";
-        card.innerHTML = `
-          <p><strong>${client.name}</strong></p>
-          <p>Email : ${client.email || "-"}</p>
-          <p>Téléphone : ${client.phone || "-"}</p>
-          <p>Notes : ${client.notes || "-"}</p>
-          <p>Créé le : ${createdAt}</p>
-        `;
-        clientsListMobile.appendChild(card);
-      }
+    // Select pour ajout de session
+    if (sessionClientSelect) {
+      const option = document.createElement("option");
+      option.value = doc.id;
+      option.textContent = client.name;
+      sessionClientSelect.appendChild(option);
+    }
 
-      // ===== Select sessions =====
-      if (sessionClientSelect) {
-        const option = document.createElement("option");
-        option.value = doc.id;
-        option.textContent = client.name;
-        sessionClientSelect.appendChild(option);
-      }
-    });
+    // ✅ Select pour édition de session (dans le modal)
+    if (editSessionClientSelect) {
+      const option2 = document.createElement("option");
+      option2.value = doc.id;
+      option2.textContent = client.name;
+      editSessionClientSelect.appendChild(option2);
+    }
   });
+});
 
 }
 
@@ -352,18 +410,22 @@ const editSessionForm = document.getElementById("editSessionForm");
 const deleteSessionBtn = document.getElementById("deleteSessionBtn");
 
 let currentSessionId = null;
+let currentSessionData = null;
 
 function openSessionModal(event) {
   currentSessionId = event.id;
+  currentSessionData = event.extendedProps; // ✅ sauvegarde du clientId, clientName, etc.
 
-  // pré-remplir les champs
-  document.getElementById("editSessionClient").value = event.extendedProps.clientId;
+  const clientNameEl = document.getElementById("editSessionClientName");
+  if (clientNameEl) clientNameEl.textContent = currentSessionData.clientName || "Client inconnu";
+
   document.getElementById("editSessionDate").value = event.start.toISOString().split("T")[0];
   document.getElementById("editSessionTime").value = event.start.toISOString().substr(11,5);
   document.getElementById("editSessionEndTime").value = event.end.toISOString().substr(11,5);
 
   sessionModal.classList.add("active");
 }
+
 
 if (closeSessionModal) {
   closeSessionModal.addEventListener("click", () => sessionModal.classList.remove("active"));
@@ -372,10 +434,10 @@ if (closeSessionModal) {
 if (editSessionForm) {
   editSessionForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (!currentSessionId) return;
+    if (!currentSessionId || !currentSessionData) return;
 
-    const clientId = document.getElementById("editSessionClient").value;
-    const clientName = document.getElementById("editSessionClient").selectedOptions[0].textContent;
+    const clientId = currentSessionData.clientId;
+    const clientName = currentSessionData.clientName;
     const date = document.getElementById("editSessionDate").value;
     const startTime = document.getElementById("editSessionTime").value;
     const endTime = document.getElementById("editSessionEndTime").value;
@@ -387,8 +449,10 @@ if (editSessionForm) {
     try {
       const ref = doc(db, "sessions", currentSessionId);
       await updateDoc(ref, {
-        clientId, clientName, start: Timestamp.fromDate(start),
-        end: Timestamp.fromDate(end), hours
+        clientId, clientName,
+        start: Timestamp.fromDate(start),
+        end: Timestamp.fromDate(end),
+        hours
       });
       showToast("Session modifiée !");
       sessionModal.classList.remove("active");
@@ -397,6 +461,7 @@ if (editSessionForm) {
     }
   });
 }
+
 
 if (deleteSessionBtn) {
   deleteSessionBtn.addEventListener("click", async () => {
@@ -413,6 +478,64 @@ if (deleteSessionBtn) {
     }
   });
 }
+
+// --- MODAL AJOUT SESSION ---
+const addSessionModal = document.getElementById("addSessionModal");
+const closeAddSessionModal = document.getElementById("closeAddSessionModal");
+const quickAddSessionForm = document.getElementById("quickAddSessionForm");
+const quickSessionClientSelect = document.getElementById("quickSessionClient");
+
+// Fermer modal
+if (closeAddSessionModal) {
+  closeAddSessionModal.addEventListener("click", () => addSessionModal.classList.remove("active"));
+}
+
+// Remplir la liste des clients
+onSnapshot(clientsRef, (snapshot) => {
+  if (quickSessionClientSelect) {
+    quickSessionClientSelect.innerHTML = "";
+    snapshot.forEach((doc) => {
+      const client = doc.data();
+      const option = document.createElement("option");
+      option.value = doc.id;
+      option.textContent = client.name;
+      quickSessionClientSelect.appendChild(option);
+    });
+  }
+});
+
+// Soumission du formulaire rapide
+if (quickAddSessionForm) {
+  quickAddSessionForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const clientId = quickSessionClientSelect.value;
+    const clientName = quickSessionClientSelect.selectedOptions[0].textContent;
+    const date = document.getElementById("quickSessionDate").value;
+    const startTime = document.getElementById("quickSessionStart").value;
+    const endTime = document.getElementById("quickSessionEnd").value;
+
+    const start = new Date(`${date}T${startTime}`);
+    const end = new Date(`${date}T${endTime}`);
+    const hours = (end - start) / (1000 * 60 * 60);
+
+    try {
+      await addDoc(sessionsRef, {
+        clientId,
+        clientName,
+        start: Timestamp.fromDate(start),
+        end: Timestamp.fromDate(end),
+        hours,
+        userId: auth.currentUser.uid,
+        createdAt: serverTimestamp()
+      });
+      showToast("Session ajoutée !");
+      addSessionModal.classList.remove("active");
+    } catch (err) {
+      showToast("Erreur ajout session : " + err.message);
+    }
+  });
+}
+
 
 
 // Appel au chargement

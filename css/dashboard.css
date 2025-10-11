@@ -610,3 +610,84 @@ footer{ text-align:center; color:var(--muted); margin-top:18px; font-size:0.9rem
   font-size: 1.5rem;
   cursor: pointer;
 }
+
+.readonly-field {
+  background: rgba(255,255,255,0.1);
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.fc-timegrid-slot.active-slot {
+  background-color: rgba(255,255,255,0.2);
+  transition: background-color 0.3s ease;
+}
+
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal.active {
+  display: flex;
+}
+.modal-content {
+  position: relative;
+  background: #222;
+  color: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+}
+.modal-content label {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+}
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  background: #333;
+  color: white;
+}
+.modal-content button {
+  margin-top: 16px;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: #4CAF50;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+.modal-content button:hover {
+  background: #45a049;
+}
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #bbb;
+}
+.close:hover {
+  color: white;
+}
+
+td[data-time].active-slot {
+  background: rgba(255,255,255,0.2);
+  transition: background-color 0.3s ease;
+}

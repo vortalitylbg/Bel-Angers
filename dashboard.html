@@ -130,8 +130,9 @@
       <h3>Gestion de la session</h3>
 
       <form id="editSessionForm">
-        <label for="editSessionClient">Client</label>
-        <select id="editSessionClient"></select>
+        <label>Client</label>
+        <p id="editSessionClientName" class="readonly-field"></p>
+
 
         <label for="editSessionDate">Date</label>
         <input type="date" id="editSessionDate" required>
@@ -149,6 +150,31 @@
       </form>
     </div>
   </div>
+
+  <!-- MODAL AJOUT SESSION -->
+  <div id="addSessionModal" class="modal">
+    <div class="modal-content">
+      <span id="closeAddSessionModal" class="close">&times;</span>
+      <h2>Nouvelle session</h2>
+      <form id="quickAddSessionForm">
+        <label for="quickSessionClient">Client</label>
+        <select id="quickSessionClient" required></select>
+
+        <label for="quickSessionDate">Date</label>
+        <input type="date" id="quickSessionDate" required>
+
+        <label for="quickSessionStart">Heure de début</label>
+        <input type="time" id="quickSessionStart" required>
+
+        <label for="quickSessionEnd">Heure de fin</label>
+        <input type="time" id="quickSessionEnd" required>
+
+        <button type="submit" class="btn-primary">Ajouter</button>
+      </form>
+    </div>
+  </div>
+
+
 
 
   <footer>
